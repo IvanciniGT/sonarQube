@@ -1,0 +1,32 @@
+version: "3" # Esquema usado por docker (Conjunto de palabras que puedo usar en este archivo)
+
+services: # Los contenedores
+  sonarqube: # El nombre de red de un contenedor... para poder referirnos.a él desde otro contenedor
+    container_name: mi-sonar # Este nombre es con el nombre que se crea el contenedor en docker... Me sirve para gestionarlo desde docker: Arrancarlo0, pararlo, ver los logs
+    image: sonarqube:community
+    depends_on:
+      - db
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://db:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    volumes:
+      - /home/ubuntu/environment/data/sonarqube/data:/opt/sonarqube/data
+      - /home/ubuntu/environment/data/sonarqube/extensions:/opt/sonarqube/extensions
+      - /home/ubuntu/environment/data/sonarqube/logs:/opt/sonarqube/logs
+    ports:
+      - "8080:9000" #Nat ... mapeo de puertos a nivel del host
+       # ^ Puerto en el host que se reenvia al puerto del contenedor
+            # ^Puerto del contenedor (según fabricante de la imagen)
+  db:
+    container_name: mi-postgresql
+    image: postgres:12
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+    volumes:
+      - /home/ubuntu/environment/data/postgresql/main:/var/lib/postgresql
+      - /home/ubuntu/environment/data/postgresql/data:/var/lib/postgresql/data
+
+# docker compose up
+# docker compose up -d  
