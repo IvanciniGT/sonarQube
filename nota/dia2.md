@@ -94,3 +94,14 @@ Sino por una herramienta que hay dentro de sonar.
 - ElasticSearch: Motor de indexación de textos... para hacer búsquedas muy potentes a texto completo (FULL TEXT)
 
 ElasticSearch requiere cambios en el Kernel de Linux para funcionar.
+
+# Kubernetes
+
+Cluster de máquinas
+
+Maquina 1
+    crio | containerd
+Maquina 2
+    crio | containerd
+Maquina N
+    crio | containerd

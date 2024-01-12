@@ -1,0 +1,6 @@
+projectKey=curso.es:mi-aplicacion
+serverUrl=http://localhost:8080
+serverVersion=10.3.0.82913
+dashboardUrl=http://localhost:8080/dashboard?id=curso.es%3Ami-aplicacion
+ceTaskId=AYz9udrzqE8iAMtNA0m3
+ceTaskUrl=http://localhost:8080/api/ce/task?id=AYz9udrzqE8iAMtNA0m3
