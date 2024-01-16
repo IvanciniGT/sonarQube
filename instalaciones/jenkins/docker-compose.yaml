@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  jenkins:
+    image: jenkins/jenkins:lts-jdk11
+    container_name: mi-jenkins
+    ports:
+      - 8081:8080
+      - 50000:50000
+    restart: on-failure
+    # vvv Docker in Docker: Queremos que un contenedor tenga capacidad para abrir nuevos contenedores.
+    user: root
+    volumes:
+      - /var/jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock # Inyectar al contenedor el socker del demonio de docker
+      - /usr/bin/docker:/usr/bin/docker # Inyectar al contenedor de Jenkins el comando docker
+      
+  
+# docker compose up
+# docker compose up -d  
+# Si el fichero no lo llamo docker-compose.yaml o docker-compose.yml
+# Habría que ejecutarlo:
+# docker compose -f <NOMBRE DEL FICHERO> up
+# docker compose -f <NOMBRE DEL FICHERO> up -d  
+
+# No es habitual. A estos fichero TODO el mundo les llama docker-compose.yaml...
+# Ya que así, nada más ver el fichero, se lo que contiene
