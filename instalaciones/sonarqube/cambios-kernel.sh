@@ -9,4 +9,7 @@ sysctl -w fs.file-max=65536
 ulimit -n 65536
 ulimit -u 4096
 
+# Para que estos parámetros tengan persistencia, habría que modificar algunos ficheros de configuración del SO:
+# VER https://www.elastic.co/guide/en/elasticsearch/reference/current/system-config.html
+
 exit
