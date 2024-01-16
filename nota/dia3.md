@@ -130,3 +130,41 @@ Esto ha sido un ejemplo de GITFLOW...
 Si estoy en un proyecto donde trabajo yo y mi compañero... seguramente no me hacen falta tantas ramas.
 Si estoy en un proyecto gestionado por una metodología en cascada no necesito tantas ramas.
 En un proyecto que siga una metodología ágil, necesito muchas mas ramas.
+
+
+---
+
+Jenkins usa plugins para comunicarse con otras herramientas.
+Eso un poco patraña.... realmente Jenkins usa plugins para a través de unos formularios, construir el comando que ejecutará en una terminal.
+Es decir, el plugin de maven lo que hace es capturar datos de un formulario:
+- Goal: compile
+- pom file: proyectos/mi-aplicacion/pom.xml
+Y con esa información genera el comando:
+mvn -f proyectos/mi-aplicacion/pom.xml compile
+El plugin no hace más.
+
+Una cosa es Jenkins... 
+Otra cosa es el plugin...
+Y otra cosa es la herramienta que yo use... mediante el plugin...
+Pero el plugin no es la herramienta en si.
+Para usar el plugin de maven, lo primero que me hace falta tener instalado es MAVEN.
+
+Aquí estamos haciendo una ñapa... que no es como trabajamos en entornos de producción...
+Mañana trabajaremos de otra forma... como sík trabajamos en entornos de producción:
+
+    Hemos instalado Jenkins en un servidor (mediante un contenedor)
+        Ese "nodo" donde he instalado jenkins es el MAESTRO DE JENKINS
+        Pero los trabajaos de compilación, empaquetado, ejecucicón de pruebas
+        NUNCA JAMAS queremos que se ejecuten en ese "nodo"... en esa máquina/contenedor...
+        Una instalación de Jenkins en producción usa "nodos" adicionales para ejecutar los trabajos.
+        Antiguamente creaba yo varios nodos:
+        - Uno para trabajar con proyectos JAVA (donde instalaba JAVA, maven...): LINUX
+        - Otro para proyectos .net: WINDOWS + .net framework .netCore
+        - Otro para proyectos de BBDD 
+        Hoy en día, esos "Nodos" se sacan dinamicamente de lo que Jenkins denomina un CLOUD.
+        En Jenkins, un CLOUD es un proveedor de nodos de ejecución de tareas:
+        - AWS
+        - AZURE
+        - Docker
+        - Kubernetes
+        - VMWare
