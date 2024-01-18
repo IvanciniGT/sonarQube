@@ -1,0 +1,183 @@
+// Este va a ser un fichero en sintaxis declarativa
+// INTEGRACION CONTINUA + ENTREGA CONTINUA
+
+pipeline {
+
+    // Indica en que AGENTE (Nodo) o que debe cumplir un NODO para ser candidato a ejecutar ESTA TAREA.
+    agent {
+        docker {
+            image "maven:3.8.6-openjdk-18"
+            // cpu
+            // Memory
+        }
+    }
+    
+    // En un entorno de produccion real, no se usan contenedores, se usan pods
+    // Los pods son conjuntos de contenedores, que son gestionados en un cluster de máquinas mediante una herramienta llamada kubernetes
+    // Cuando trabajamos con kubernets, los admionistradores de un cluster de ckubernetes crean : NAMESPACES para cada proyecto
+    // A esos namespaces les definen unos RESOURCE_LIMITS y unos RESOURCE QUOTAS
+    // De forma que limitan el uso de CPU, memoria, disco.. etc, que los DEVOPS, desarrololadores...
+    // quien sea que esté creando PODS (que tienen dentro contenedores) puedan usar.
+    
+    parameters {
+      booleanParam defaultValue: true, description: 'Marque para realizar las pruebas de rendimiento !!!!!', name: 'PRUEBAS_RENDIMIENTO'
+    }
+    
+
+    stages {
+        
+        stage('Compilación') {
+            //agent
+            steps {
+                echo 'Compilo: Lanzo el mvn compile' //Tarea 
+                sh 'mvn compile'
+            }
+            //when
+        }
+        stage('Pruebas') {
+            
+            stages {                
+                stage('Pruebas unitarias') {
+                    steps {
+                        echo 'Lanzo el mvn test UNIT TESTING'
+                        sh 'mvn test'
+                    }
+                    post {
+                        always {
+                            echo 'Publico el informe de pruebas'
+                            junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+                        }
+                    }
+                }
+                
+                stage('Pruebas estáticas') {
+                    steps {
+                        echo 'Lanzo el sonar'
+                        withSonarQubeEnv('MiSonarqube'){
+                            // ME pone en automático la URL del sonar y su credencial
+                            sh '''
+                                mvn sonar:sonar
+                            '''
+                        }
+                    }
+                    post {
+                        success{
+                            echo 'Esperar el resultado de Sonar'
+                            timeout( time: 1, unit: 'HOURS'){
+                                waitForQualityGate abortPipeline: true
+                            }
+                        }
+                    }
+                }
+                          
+                stage('Pruebas integración') {
+                    steps {
+                        echo 'Lanzo el mvn test INTEGRATION TESTS'
+                    }
+                    post {
+                        always {
+                            echo 'Publico el informe de pruebas'
+                        }
+                    }
+                }
+                stage('Pruebas dinamícas') {
+                    stages {
+                        stage('Preparación del entorno') {
+                            steps {
+                                echo 'Necesito poner en marcha el grid de selenium'
+                                echo 'Necesito BBDD'
+                                echo 'Necesito un entorno donde ejecyat los programas de selenium'
+                                echo 'Necesito tener donde desplegar el servidor JBOSS'
+                                echo 'Pongo en marcha el JBOSS'
+                            }
+                        }
+                        stage('Despliego la versión para pruebas') {
+                            steps {
+                                echo 'Empaquetado'
+                                echo 'Despliego'
+                            }
+                        }
+                        stage('Pruebas de sistema UI') {
+                            parallel {
+                                stage('Edge') {
+                                    steps {
+                                        echo 'Lanzo el mvn test END2END Edge'
+                                    }
+                                    post {
+                                        always {
+                                            echo 'Publico el informe de pruebas'
+                                        }
+                                    }
+                                }
+                                stage('Chrome') {
+                                    steps {
+                                        echo 'Lanzo el mvn test END2END Chrome'
+                                    }
+                                    post {
+                                        always {
+                                            echo 'Publico el informe de pruebas'
+                                        }
+                                    }
+                                }
+                                stage('Firefox') {
+                                    steps {
+                                        echo 'Lanzo el mvn test END2END Firefox'
+                                    }
+                                    post {
+                                        always {
+                                            echo 'Publico el informe de pruebas'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        stage('Pruebas de rendimiento') {
+                            when {
+                                expression {
+                                    return params.PRUEBAS_RENDIMIENTO;
+                                }
+                            }
+                            steps {
+                                echo 'JMETER' // Linea base
+                                echo 'JMETER' // Media carga
+                                echo 'JMETER' // Carga completa
+                                echo 'JMETER' // Doble carga
+                            }
+                        }
+                        stage('Pruebas de HA') {
+                            steps {
+                                echo '...'
+                            }
+                        }
+                    }
+                    post{
+                        always {
+                            echo 'Me crujo los entornos!'
+                        }
+                    }
+                }
+            }
+            //post {}
+        }
+        stage('Empaquetado') {
+            steps {
+                echo 'Lanzo el mvn package'
+                sh 'mvn package -DskipTests'
+            }
+            post {
+                success {
+                    echo 'Guardo el artefacto'
+                    archiveArtifacts artifacts: 'target/*.jar', followSymlinks: false                
+                }
+            }
+        }
+        
+    }
+    post {
+        always {
+            echo 'Borrado del workspace'
+            cleanWs deleteDirs: true, patterns: [[pattern: 'target/', type: 'INCLUDE']]
+        }
+    }
+   
+}
